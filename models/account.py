@@ -133,8 +133,7 @@ class Account():
                     while not bool(re.match('[0-9]{11}',attribute_value)):
                         print('Client ID must be an 11 digit number')
                         attribute_value = input(f"\nType the {attribute_description} of the account's owner")
-                    # else:
-                    #     setattr(self, attribute, attribute_value)
+                    
                 elif attribute == 'birth_date':
                     while not bool(re.match('[0-9]{4}-[0-9]{2}-[0-9]{2}',attribute_value)):
                         print('Date of Birth must be in the following format (yyyy-mm-dd')
@@ -255,7 +254,6 @@ class Account():
                             target_account.balance += transaction_value
                             target_account.update_db('balance', target_account.balance)
 
-                            
                             print(self.balance)
                             print(target_account.balance)
 
@@ -283,5 +281,6 @@ def check_sufficient_funds(account_number_to_be_check: int, value_to_be_check: f
 
         if res['balance'] <= value_to_be_check:
             print('\nInsufficient funds')
+        
         else:
             return True

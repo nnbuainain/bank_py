@@ -4,8 +4,8 @@ from db.database import connect_or_create_bank_db, list_accounts
 def menu() -> bool:
         print("\nWelcome to the bank\n")
         print("1) Create a new account")
-        print("2) Deposit money from an account")
-        print("3) Withdraw money to an account")
+        print("2) Deposit money into an account")
+        print("3) Withdraw money from an account")
         print("4) Transfer money between accounts")
         print("5) See list of accounts")
         print("6) Exit")
