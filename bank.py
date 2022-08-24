@@ -1,47 +1,71 @@
-"""An application that simulates a bank account management system.
-The app initialize as offers the user the following options:
-1) Create a new account
-2) Withdraw money from an account
-3) Deposit money to an account
-
-4) Transfer money between accounts
-5) See list of accounts
-6) Exit"""
+from models.account import Account
+from db.database import connect_or_create_bank_db, list_accounts
 
 def menu() -> bool:
-    print("Welcome to the bank")
-    print("1) Create a new account")
-    print("2) Withdraw money from an account")
-    print("3) Deposit money to an account")
-    print("4) Transfer money between accounts")
-    print("5) See list of accounts")
-    print("6) Exit")
-
-    try:
-        choice = input("Enter your choice: ")
-        if choice == "1":
-            create_account()
-        elif choice == "2":
-            withdraw_money()
-        elif choice == "3":
-            deposit_money()
-        elif choice == "4":
-            transfer_money()
-        elif choice == "5":
-            list_accounts_money()
-        elif choice == "6":
-            return False
-    
-    except ValueError:
-        print("Invalid option")
-        menu()
-    
-    else:
-        print("Invalid choice")
-        menu()
+        print("\nWelcome to the bank\n")
+        print("1) Create a new account")
+        print("2) Deposit money from an account")
+        print("3) Withdraw money to an account")
+        print("4) Transfer money between accounts")
+        print("5) See list of accounts")
+        print("6) Exit")
 
 def main() -> bool:
-    menu()
+    
+    option = None
+
+    conn, cur = connect_or_create_bank_db()
+
+    while option != 6:
+        menu()
+
+        try:
+            choice = input("\nEnter your choice: ")
+        
+        except ValueError:
+            print("\nInvalid option")
+            menu()
+
+        else:
+            if choice == "1":
+                acc = Account()
+                
+                acc.create_account()
+                
+                print(f'\nAccount {acc.account_number} created successfully')
+                
+                list_accounts()
+
+            elif choice == "2":
+                acc = Account()
+
+                acc.deposit_money()
+            
+            elif choice == "3":
+                acc = Account()
+                
+                acc.withdraw_money()
+            
+            elif choice == "4":
+                acc = Account()
+
+                acc.transfer_money()
+
+            elif choice == "5":
+                print('\n######## Showing list of accounts registered ########')
+                list_accounts()
+            
+            elif choice == "6":
+                print('\nExiting the app...')
+                print('Goodbye!')
+                
+                return False
+            
+            else:
+                print('\nInvalid choice, please type an option between 1 and 6')
+                
+                menu()
+
 
 if __name__ == '__main__':
     main()
