@@ -22,11 +22,8 @@ def connect_or_create_bank_db() -> tuple[sqlite3.Connection, sqlite3.Cursor]:
     
     return conn, cur
 
-conn, cur = connect_or_create_bank_db()
 
-
-def get_last_account_number() -> int:
-    global conn, cur
+def get_last_account_number(conn, cur) -> int:
     
     cur.execute('''SELECT * FROM account ORDER BY account_number DESC LIMIT 1''')
     
@@ -38,8 +35,7 @@ def get_last_account_number() -> int:
     else: 
         return res['account_number']
 
-def list_accounts():
-    global conn, cur
+def list_accounts(conn, cur):
     
     cur.execute('''SELECT * from account''')
     
@@ -60,7 +56,7 @@ def list_accounts():
     else:
         print('The Database is currently empty')
 
-def delete_db():
+def delete_db(conn, cur):
     file_path = './bank.db'
     
     if os.path.isfile(file_path):

@@ -12,6 +12,10 @@ def menu() -> bool:
 
 def main() -> bool:
     
+    conn, cur = connect_or_create_bank_db()
+    
+    Account.conn, Account.cur = conn, cur
+
     option = None
 
     while option != 6:
@@ -32,7 +36,7 @@ def main() -> bool:
                 
                 print(f'\nAccount {acc.account_number} created successfully')
                 
-                list_accounts()
+                list_accounts(Account.conn, Account.cur)
 
             elif choice == "2":
                 acc = Account()
@@ -51,7 +55,7 @@ def main() -> bool:
 
             elif choice == "5":
                 print('\n######## Showing list of accounts registered ########')
-                list_accounts()
+                list_accounts(Account.conn, Account.cur)
             
             elif choice == "6":
                 print('\nExiting the app...')

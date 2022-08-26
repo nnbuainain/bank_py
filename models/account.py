@@ -1,7 +1,9 @@
-from db.database import get_last_account_number, conn, cur
+from db.database import get_last_account_number
 import re
 class Account():
-    
+    conn = None
+    cur = None
+
     def __init__(self):
         
         self.__account_number = None
@@ -66,11 +68,11 @@ class Account():
 
     def load_account_from_db(self, account_number: int):
         
-        cur.execute('''
+        Account.cur.execute('''
         SELECT * FROM account
         WHERE account_number = {}'''.format(account_number))
 
-        results = cur.fetchone()
+        results = Account.cur.fetchone()
 
         self.__account_number = int(results['account_number'])
         self.__name = results['name']
@@ -83,24 +85,24 @@ class Account():
         return self
     
     def insert_into_db(self):
-        cur.execute('''INSERT INTO account VALUES({}, '{}', '{}', '{}', '{}', '{}', {})'''\
+        Account.cur.execute('''INSERT INTO account VALUES({}, '{}', '{}', '{}', '{}', '{}', {})'''\
                        .format(self.__account_number,self.__name, self.__last_name,\
                        self.__client_id, self.__birth_date, self.__address, self.__balance))
         
-        conn.commit()
+        Account.conn.commit()
     
-    def remove_from_db(self):
-        cur.execute('''DELETE FROM account WHERE account_number IS {}'''\
+    def remove_from_db(self, conn, cur):
+        Account.cur.execute('''DELETE FROM account WHERE account_number IS {}'''\
             .format(self.__account_number))
         
-        conn.commit()
+        Account.conn.commit()
 
     def update_db(self, column: str, new_value: tuple[int, float, str]):
         if column != 'account_number':
-            cur.execute('''UPDATE account SET '{}' = '{}' WHERE account_number IS {}'''\
+            Account.cur.execute('''UPDATE account SET '{}' = '{}' WHERE account_number IS {}'''\
                 .format(column, new_value, self.__account_number))
             
-            conn.commit()
+            Account.conn.commit()
                 
         else:
             print("\nAccount number can't be changed")
@@ -112,7 +114,7 @@ class Account():
              'client_id': 'Client ID Number (CPF with 11 digits)', 'birth_date': 'Date of Birth (yyyy-mm-dd)',\
                 'address':'Full Address: Street, number, city, state'}
 
-        self.__account_number = get_last_account_number() + 1
+        self.__account_number = get_last_account_number(Account.conn, Account.cur) + 1
 
         for attribute, attribute_description in registration_attributes.items():
             try:
@@ -252,8 +254,9 @@ class Account():
                             target_account.update_db('balance', target_account.balance)
 
                             print(f'Transaction concluded successfully!')
-                            print(f'${self.balance:.2f}')
-                            print(target_account.balance)
+                            print(f'The {self.account_number} balance is now ${self.balance:.2f}')
+                            print(f'The {target_account.account_number} balance is now ${self.balance:.2f}')
+                            
 
                 else:
                     print(f'\nTarget account {target_account} is not registered')    
@@ -262,9 +265,9 @@ class Account():
 
     @staticmethod
     def check_if_account_exists(account_number_to_be_check: int) -> bool:
-            cur.execute('''SELECT * FROM account WHERE account_number = {}'''.format(account_number_to_be_check))
+            Account.cur.execute('''SELECT * FROM account WHERE account_number = {}'''.format(account_number_to_be_check))
                 
-            res = cur.fetchone()
+            res = Account.cur.fetchone()
 
             if res != None:
                 return True
@@ -273,9 +276,9 @@ class Account():
                 return False
     @staticmethod
     def check_sufficient_funds(account_number_to_be_check: int, value_to_be_check: float) -> bool:
-            cur.execute('''SELECT * FROM account WHERE account_number = {}'''.format(account_number_to_be_check))
+            Account.cur.execute('''SELECT * FROM account WHERE account_number = {}'''.format(account_number_to_be_check))
                 
-            res = cur.fetchone()
+            res = Account.cur.fetchone()
 
             if res['balance'] <= value_to_be_check:
                 print('\nInsufficient funds')
