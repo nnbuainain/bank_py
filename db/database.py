@@ -24,6 +24,7 @@ def connect_or_create_bank_db() -> tuple[sqlite3.Connection, sqlite3.Cursor]:
 
 conn, cur = connect_or_create_bank_db()
 
+
 def get_last_account_number() -> int:
     global conn, cur
     
@@ -53,7 +54,7 @@ def list_accounts():
             print(f"\nAccount Number: {account['account_number']}\t \
                       Account Owner: {account['name']} {account['last_name']}")
             
-            print(f"Account Balance: {account['balance']:.2f}")
+            print(f"Account Balance: ${account['balance']:.2f}")
             
             print('\n##############################################################################\n')
     else:

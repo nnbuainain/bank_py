@@ -112,7 +112,7 @@ class Account():
              'client_id': 'Client ID Number (CPF with 11 digits)', 'birth_date': 'Date of Birth (yyyy-mm-dd)',\
                 'address':'Full Address: Street, number, city, state'}
 
-        self.__account_number = get_last_account_number()
+        self.__account_number = get_last_account_number() + 1
 
         for attribute, attribute_description in registration_attributes.items():
             try:
@@ -132,8 +132,8 @@ class Account():
                         attribute_value = input(f"\nType the {attribute_description} of the account's owner ")
                     
                 elif attribute == 'birth_date':
-                    while not bool(re.match('[0-9]{4}-[0-9]{2}-[0-9]{2}$',attribute_value)):
-                        print('Date of Birth must be in the following format (yyyy-mm-dd')
+                    while not bool(re.match('(19[0-9]{2}|20[0-1][09]|20[2][0-2])-(0[1-9]|1[0-2])-(0[1-9]|1[0-9]|2[0-9]|3[01])$',attribute_value)):
+                        print('Invalid date, Date of Birth must be in the following format (yyyy-mm-dd')
                         attribute_value = input(f"\nType the {attribute_description} of the account's owner ")
                 else:
                     setattr(self, attribute, attribute_value)
@@ -171,7 +171,7 @@ class Account():
                         self.update_db('balance', self.__balance)
                         
                         print(f'\nDeposited of R${value} made successfully to Account {self.__account_number}!')
-                        print(f"\nThe Balance of the account {self.__account_number} is now {self.balance}")
+                        print(f"\nThe Balance of the account {self.__account_number} is now ${self.balance:.2f}")
 
             else:
                 print('\nThe account your trying to deposit is not registered')
@@ -209,8 +209,8 @@ class Account():
                             
                             self.update_db('balance', self.__balance)
                             
-                            print(f'\nWithdraw of R${value} made successfully to Account {self.__account_number}!')
-                            print(f"\nThe Balance of the account {self.__account_number} is now {self.balance}")
+                            print(f'\nWithdraw of ${value} made successfully to Account {self.__account_number}!')
+                            print(f"\nThe Balance of the account {self.__account_number} is now ${self.balance}")
 
             else:
                 print('\nThe account your trying to deposit is not registered')
@@ -252,7 +252,7 @@ class Account():
                             target_account.update_db('balance', target_account.balance)
 
                             print(f'Transaction concluded successfully!')
-                            print(f'{self.balance}')
+                            print(f'${self.balance:.2f}')
                             print(target_account.balance)
 
                 else:
