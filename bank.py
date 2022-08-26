@@ -14,8 +14,6 @@ def main() -> bool:
     
     option = None
 
-    conn, cur = connect_or_create_bank_db()
-
     while option != 6:
         menu()
 
@@ -64,8 +62,6 @@ def main() -> bool:
             else:
                 print('\nInvalid choice, please type an option between 1 and 6')
                 
-                menu()
-
 
 if __name__ == '__main__':
     main()

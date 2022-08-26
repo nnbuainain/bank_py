@@ -53,7 +53,7 @@ def list_accounts():
             print(f"\nAccount Number: {account['account_number']}\t \
                       Account Owner: {account['name']} {account['last_name']}")
             
-            print(f"Account Balance: {account['balance']}")
+            print(f"Account Balance: {account['balance']:.2f}")
             
             print('\n##############################################################################\n')
     else:
@@ -65,7 +65,7 @@ def delete_db():
     if os.path.isfile(file_path):
         confirm_deletion = input("Are you sure you want to delete the database? \
                                         You won't be able to retrieve the information \
-                                        in the future (Y/n)")
+                                        in the future (Y/n) ")
         
         if confirm_deletion.upper() == 'Y':
             print("Database has been deleted")
