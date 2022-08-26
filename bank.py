@@ -10,6 +10,7 @@ def menu() -> bool:
         print("5) See list of accounts")
         print("6) Exit")
 
+
 def main() -> bool:
     
     conn, cur = connect_or_create_bank_db()

@@ -1,4 +1,5 @@
-from db.database import get_last_account_number
+from db.database import get_last_account_number, check_if_account_exists, \
+    check_sufficient_funds, insert_into_db, update_db
 import re
 class Account():
     conn = None
@@ -84,30 +85,7 @@ class Account():
         
         return self
     
-    def insert_into_db(self):
-        Account.cur.execute('''INSERT INTO account VALUES({}, '{}', '{}', '{}', '{}', '{}', {})'''\
-                       .format(self.__account_number,self.__name, self.__last_name,\
-                       self.__client_id, self.__birth_date, self.__address, self.__balance))
-        
-        Account.conn.commit()
     
-    def remove_from_db(self, conn, cur):
-        Account.cur.execute('''DELETE FROM account WHERE account_number IS {}'''\
-            .format(self.__account_number))
-        
-        Account.conn.commit()
-
-    def update_db(self, column: str, new_value: tuple[int, float, str]):
-        if column != 'account_number':
-            Account.cur.execute('''UPDATE account SET '{}' = '{}' WHERE account_number IS {}'''\
-                .format(column, new_value, self.__account_number))
-            
-            Account.conn.commit()
-                
-        else:
-            print("\nAccount number can't be changed")
-    
-
     def create_account(self):
     
         registration_attributes = {'name':'First Name', 'last_name': 'Last Name',\
@@ -140,7 +118,7 @@ class Account():
                 else:
                     setattr(self, attribute, attribute_value)
 
-        self.insert_into_db()
+        insert_into_db(self, Account.conn, Account.cur)
 
 
     def deposit_money(self):
@@ -152,7 +130,7 @@ class Account():
             self.deposit_money()
 
         else:
-            if Account.check_if_account_exists(account_for_deposit):
+            if check_if_account_exists(account_for_deposit, Account.conn, Account.cur):
                 self.load_account_from_db(account_for_deposit)
                 
                 print(f'\nAccount number to receive deposited {account_for_deposit}')
@@ -170,7 +148,8 @@ class Account():
                     else:
                         self.__balance += value
                         
-                        self.update_db('balance', self.__balance)
+                        update_db(account = self, column = 'balance', new_value = self.balance,\
+                            conn = Account.conn, cur = Account.cur)
                         
                         print(f'\nDeposited of R${value} made successfully to Account {self.__account_number}!')
                         print(f"\nThe Balance of the account {self.__account_number} is now ${self.balance:.2f}")
@@ -190,7 +169,7 @@ class Account():
             self.withdraw_money()
 
         else:
-            if Account.check_if_account_exists(account_to_withdraw):
+            if check_if_account_exists(account_to_withdraw, Account.conn, Account.cur):
                 self.load_account_from_db(account_to_withdraw)
                 
                 print(f'\nAccount number to be drawn {account_to_withdraw}')
@@ -206,10 +185,11 @@ class Account():
                         print('\nInvalid value, positive value expected')
 
                     else:
-                        if Account.check_sufficient_funds(account_to_withdraw, value):
+                        if check_sufficient_funds(account_to_withdraw, value, Account.conn, Account.cur):
                             self.__balance -= value
                             
-                            self.update_db('balance', self.__balance)
+                            update_db(account = self, column = 'balance', new_value = self.balance,\
+                            conn = Account.conn, cur = Account.cur)
                             
                             print(f'\nWithdraw of ${value} made successfully to Account {self.__account_number}!')
                             print(f"\nThe Balance of the account {self.__account_number} is now ${self.balance}")
@@ -229,8 +209,8 @@ class Account():
                 self.transfer_money()
 
         else:
-            if Account.check_if_account_exists(source_account_number):
-                if Account.check_if_account_exists(target_account_number):
+            if check_if_account_exists(source_account_number, Account.conn, Account.cur):
+                if check_if_account_exists(target_account_number, Account.conn, Account.cur):
                     self.load_account_from_db(source_account_number)
                     
                     target_account = Account()
@@ -246,42 +226,21 @@ class Account():
                         print('\nInvalid Value, numeric value expected')
                     
                     else:
-                        if Account.check_sufficient_funds(self.account_number, transaction_value):
+                        if check_sufficient_funds(self.account_number, transaction_value, Account.conn, Account.cur):
                             self.balance -= transaction_value
-                            self.update_db('balance', self.balance)
+                            update_db(account = self, column = 'balance', new_value = self.balance,\
+                            conn = Account.conn, cur = Account.cur)
 
                             target_account.balance += transaction_value
-                            target_account.update_db('balance', target_account.balance)
+                            update_db(account = target_account, column = 'balance', new_value = target_account.balance,\
+                            conn = Account.conn, cur = Account.cur)
 
                             print(f'Transaction concluded successfully!')
-                            print(f'The {self.account_number} balance is now ${self.balance:.2f}')
-                            print(f'The {target_account.account_number} balance is now ${self.balance:.2f}')
-                            
+                            print(f'The balance of Account {self.account_number} is now ${self.balance:.2f}')
+                            print(f'The balance of Account {target_account.account_number} is now ${target_account.balance:.2f}')             
 
                 else:
                     print(f'\nTarget account {target_account} is not registered')    
+            
             else:
                 print(f'\nSource account {self.account_number} is not registered')
-
-    @staticmethod
-    def check_if_account_exists(account_number_to_be_check: int) -> bool:
-            Account.cur.execute('''SELECT * FROM account WHERE account_number = {}'''.format(account_number_to_be_check))
-                
-            res = Account.cur.fetchone()
-
-            if res != None:
-                return True
-            
-            else:
-                return False
-    @staticmethod
-    def check_sufficient_funds(account_number_to_be_check: int, value_to_be_check: float) -> bool:
-            Account.cur.execute('''SELECT * FROM account WHERE account_number = {}'''.format(account_number_to_be_check))
-                
-            res = Account.cur.fetchone()
-
-            if res['balance'] <= value_to_be_check:
-                print('\nInsufficient funds')
-            
-            else:
-                return True

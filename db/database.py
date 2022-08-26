@@ -23,6 +23,30 @@ def connect_or_create_bank_db() -> tuple[sqlite3.Connection, sqlite3.Cursor]:
     return conn, cur
 
 
+def insert_into_db(account, conn, cur):
+    cur.execute('''INSERT INTO account VALUES({}, '{}', '{}', '{}', '{}', '{}', {})'''\
+                    .format(account.account_number,account.name, account.last_name,\
+                    account.client_id, account.birth_date, account.address, account.balance))
+    
+    conn.commit()
+
+# def remove_from_db(account, conn, cur):
+#     cur.execute('''DELETE FROM account WHERE account_number IS {}'''\
+#         .format(account.account_number))
+    
+#     conn.commit()
+
+def update_db(account, column: str, new_value: tuple[int, float, str], conn, cur):
+    if column != 'account_number':
+        cur.execute('''UPDATE account SET '{}' = '{}' WHERE account_number IS {}'''\
+            .format(column, new_value, account.account_number))
+        
+        conn.commit()
+            
+    else:
+        print("\nAccount number can't be changed")
+
+
 def get_last_account_number(conn, cur) -> int:
     
     cur.execute('''SELECT * FROM account ORDER BY account_number DESC LIMIT 1''')
@@ -34,6 +58,7 @@ def get_last_account_number(conn, cur) -> int:
     
     else: 
         return res['account_number']
+
 
 def list_accounts(conn, cur):
     
@@ -56,6 +81,7 @@ def list_accounts(conn, cur):
     else:
         print('The Database is currently empty')
 
+
 def delete_db(conn, cur):
     file_path = './bank.db'
     
@@ -72,3 +98,27 @@ def delete_db(conn, cur):
             conn.close() 
             
             cur.close()
+
+
+def check_if_account_exists(account_number_to_be_check: int, conn, cur) -> bool:
+        cur.execute('''SELECT * FROM account WHERE account_number = {}'''.format(account_number_to_be_check))
+            
+        res = cur.fetchone()
+
+        if res != None:
+            return True
+        
+        else:
+            return False
+
+
+def check_sufficient_funds(account_number_to_be_check: int, value_to_be_check: float, conn, cur) -> bool:
+        cur.execute('''SELECT * FROM account WHERE account_number = {}'''.format(account_number_to_be_check))
+            
+        res = cur.fetchone()
+
+        if res['balance'] <= value_to_be_check:
+            print('\nInsufficient funds')
+        
+        else:
+            return True
